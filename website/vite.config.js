@@ -12,6 +12,7 @@ export default defineConfig({
         main: path.resolve(rootDir, "index.html"),
         privacy: path.resolve(rootDir, "privacy.html"),
         support: path.resolve(rootDir, "support.html"),
+        terms: path.resolve(rootDir, "terms.html"),
       },
     },
   },
