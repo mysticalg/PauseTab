@@ -59,6 +59,15 @@ test("falls back to the public URL when a billing return URL origin is not allow
   assert.equal(resolveAllowedReturnUrl("https://example.com/hijack", fallback), fallback);
 });
 
+test("parses optional S3-backed store configuration", () => {
+  process.env.PAUSETAB_STORE_S3_BUCKET = "pausetab-prod-data";
+  process.env.PAUSETAB_STORE_S3_KEY = "prod/store.json";
+
+  const config = getConfig();
+  assert.equal(config.storeS3Bucket, "pausetab-prod-data");
+  assert.equal(config.storeS3Key, "prod/store.json");
+});
+
 test("rejects incomplete production configuration", () => {
   process.env.NODE_ENV = "production";
   process.env.PAUSETAB_PUBLIC_URL = "http://localhost:5173";

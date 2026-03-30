@@ -11,6 +11,8 @@ const envSchema = z.object({
   PAUSETAB_ALLOWED_RETURN_ORIGINS: z.string().optional(),
   PAUSETAB_PUBLIC_URL: z.string().optional(),
   PAUSETAB_STORE_PATH: z.string().optional(),
+  PAUSETAB_STORE_S3_BUCKET: z.string().optional(),
+  PAUSETAB_STORE_S3_KEY: z.string().optional(),
   PAUSETAB_TOKEN_PEPPER: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
@@ -27,6 +29,8 @@ export type AppConfig = {
   allowedExtensionIds: string[];
   allowedReturnOrigins: string[];
   storePath: string;
+  storeS3Bucket?: string;
+  storeS3Key: string;
   tokenPepper: string;
   stripeSecretKey?: string;
   stripeWebhookSecret?: string;
@@ -39,6 +43,7 @@ export type AppConfig = {
 
 const DEFAULT_PUBLIC_URL = "http://localhost:5173";
 const DEFAULT_STORE_PATH = "data/store.json";
+const DEFAULT_STORE_S3_KEY = "store.json";
 const DEFAULT_TOKEN_PEPPER = "pausetab-dev-pepper";
 const LOCALHOST_ORIGIN_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
@@ -170,6 +175,8 @@ export const getConfig = (): AppConfig => {
     allowedExtensionIds: resolveAllowedExtensionIds(splitCsv(parsed.PAUSETAB_ALLOWED_EXTENSION_IDS)),
     allowedReturnOrigins: resolveAllowedReturnOrigins(splitCsv(parsed.PAUSETAB_ALLOWED_RETURN_ORIGINS), publicUrl),
     storePath: parsed.PAUSETAB_STORE_PATH ?? DEFAULT_STORE_PATH,
+    storeS3Bucket: parsed.PAUSETAB_STORE_S3_BUCKET,
+    storeS3Key: parsed.PAUSETAB_STORE_S3_KEY ?? DEFAULT_STORE_S3_KEY,
     tokenPepper: parsed.PAUSETAB_TOKEN_PEPPER ?? DEFAULT_TOKEN_PEPPER,
     stripeSecretKey: parsed.STRIPE_SECRET_KEY,
     stripeWebhookSecret: parsed.STRIPE_WEBHOOK_SECRET,

@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { GetObjectCommand, HeadObjectCommand, NoSuchKey, PutObjectCommand, S3Client, S3ServiceException } from "@aws-sdk/client-s3";
+
 import { getConfig } from "../lib/config.js";
 import { compareSecret } from "../lib/crypto.js";
 import { accountRecordSchema, storeDataSchema, type AccountRecord, type StoreData, type WebhookRecord } from "../lib/schemas.js";
@@ -11,14 +13,22 @@ const emptyStore = (): StoreData => ({
   webhooks: [],
 });
 
+type StoreBackend = {
+  read(): Promise<StoreData>;
+  write(next: StoreData): Promise<void>;
+};
+
 const resolveStorePath = () => {
   const configuredPath = getConfig().storePath;
   return path.isAbsolute(configuredPath) ? configuredPath : path.resolve(process.cwd(), configuredPath);
 };
 
-class JsonStore {
-  private queue = Promise.resolve<unknown>(undefined);
+const parseStoreData = (value: unknown) => {
+  const result = storeDataSchema.safeParse(value);
+  return result.success ? result.data : emptyStore();
+};
 
+class FileStoreBackend implements StoreBackend {
   private async ensureStoreFile() {
     const filePath = resolveStorePath();
     await mkdir(path.dirname(filePath), { recursive: true });
@@ -35,18 +45,83 @@ class JsonStore {
   async read() {
     const filePath = await this.ensureStoreFile();
     const content = await readFile(filePath, "utf8");
-    const parsed = JSON.parse(content) as unknown;
-    const result = storeDataSchema.safeParse(parsed);
-    return result.success ? result.data : emptyStore();
+    return parseStoreData(JSON.parse(content) as unknown);
+  }
+
+  async write(next: StoreData) {
+    const filePath = await this.ensureStoreFile();
+    await writeFile(filePath, JSON.stringify(storeDataSchema.parse(next), null, 2), "utf8");
+  }
+}
+
+class S3StoreBackend implements StoreBackend {
+  private readonly client = new S3Client({});
+  private readonly bucket = getConfig().storeS3Bucket!;
+  private readonly key = getConfig().storeS3Key;
+
+  private async ensureStoreObject() {
+    try {
+      await this.client.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: this.key,
+        }),
+      );
+    } catch (error) {
+      if (!this.isMissingObject(error)) {
+        throw error;
+      }
+
+      await this.write(emptyStore());
+    }
+  }
+
+  private isMissingObject(error: unknown) {
+    return error instanceof NoSuchKey || (error instanceof S3ServiceException && error.$metadata.httpStatusCode === 404);
+  }
+
+  async read() {
+    await this.ensureStoreObject();
+
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: this.key,
+      }),
+    );
+
+    const content = (await response.Body?.transformToString()) ?? JSON.stringify(emptyStore());
+    return parseStoreData(JSON.parse(content) as unknown);
+  }
+
+  async write(next: StoreData) {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: this.key,
+        Body: JSON.stringify(storeDataSchema.parse(next), null, 2),
+        ContentType: "application/json",
+      }),
+    );
+  }
+}
+
+const createBackend = (): StoreBackend => (getConfig().storeS3Bucket ? new S3StoreBackend() : new FileStoreBackend());
+
+class JsonStore {
+  private queue = Promise.resolve<unknown>(undefined);
+  private readonly backend = createBackend();
+
+  async read() {
+    return this.backend.read();
   }
 
   async write(mutator: (store: StoreData) => StoreData | Promise<StoreData>) {
     this.queue = this.queue.then(async () => {
-      const filePath = await this.ensureStoreFile();
       const current = await this.read();
       const next = await mutator(current);
       const validated = storeDataSchema.parse(next);
-      await writeFile(filePath, JSON.stringify(validated, null, 2), "utf8");
+      await this.backend.write(validated);
       return validated;
     });
 
