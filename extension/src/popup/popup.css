@@ -1,0 +1,54 @@
+body {
+  min-width: 380px;
+}
+
+.popup-shell {
+  padding: 12px;
+}
+
+.popup-panel {
+  overflow: hidden;
+}
+
+.popup-section {
+  padding: 18px 20px;
+}
+
+.popup-header {
+  padding: 20px 20px 16px;
+}
+
+.popup-header .title {
+  font-size: 28px;
+}
+
+.popup-header .subtitle {
+  max-width: 26ch;
+}
+
+.popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.popup-miniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.popup-miniGrid .metric {
+  padding: 0;
+  border: 0;
+}
+
+.popup-linkButton {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 700;
+}

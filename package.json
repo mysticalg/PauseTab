@@ -1,0 +1,18 @@
+{
+  "name": "pausetab",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "extension",
+    "website",
+    "backend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:extension": "npm run dev --workspace extension",
+    "dev:website": "npm run dev --workspace website",
+    "dev:backend": "npm run dev --workspace backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

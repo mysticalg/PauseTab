@@ -1,0 +1,64 @@
+.options-shell {
+  padding: 20px;
+}
+
+.options-app {
+  overflow: hidden;
+}
+
+.options-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stack {
+  display: grid;
+  gap: 18px;
+}
+
+.schedule-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.day-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rule-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.rule-row {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.rule-rowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rule-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
