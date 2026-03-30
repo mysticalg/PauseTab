@@ -10,3 +10,4 @@ website/dist/
 backend/dist/
 backend/data/store.json
 tmp/
+artifacts/

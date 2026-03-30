@@ -12,6 +12,8 @@
     "dev:extension": "npm run dev --workspace extension",
     "dev:website": "npm run dev --workspace website",
     "dev:backend": "npm run dev --workspace backend",
+    "package:extension": "npm run build --workspace extension && node scripts/package-extension.mjs",
+    "release:check": "npm run build && npm run test && npm run typecheck && npm run package:extension",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
   }

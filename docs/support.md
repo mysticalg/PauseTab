@@ -6,6 +6,7 @@ Before launch, publish a support email address and link it in:
 
 - Chrome Web Store listing
 - website footer
+- `website/support.html`
 - privacy policy
 - billing receipts / Stripe customer portal branding
 
@@ -21,8 +22,10 @@ Before launch, publish a support email address and link it in:
 - Set real Stripe secret key and webhook secret
 - Set monthly, annual, and lifetime Stripe price IDs
 - Replace the default token pepper with a long random secret
+- Set `VITE_PAUSETAB_SUPPORT_EMAIL` on the website build
 - Set `VITE_PAUSETAB_API_BASE_URL` and `VITE_PAUSETAB_SITE_URL` to production domains
 - Register the Stripe webhook endpoint for subscription and checkout events
+- Optionally set `PAUSETAB_ALLOWED_EXTENSION_IDS` once the production extension ID is known
 
 ## Remaining non-code launch work
 
@@ -30,3 +33,4 @@ Before launch, publish a support email address and link it in:
 - Prepare trader / seller verification where required
 - Set real public domain and privacy-policy URL
 - Create support inbox and refund workflow
+- Run `npm run release:check` and upload the generated zip from `artifacts/`

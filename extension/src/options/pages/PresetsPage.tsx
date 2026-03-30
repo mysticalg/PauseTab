@@ -1,5 +1,5 @@
 import { PRESET_SITES } from "../../lib/constants";
-import { canCreateAnotherRule } from "../../lib/licensing";
+import { canCreateAnotherRule, getFreeTierUpgradeMessage } from "../../lib/licensing";
 import { createRule } from "../../lib/rules";
 import { updateState } from "../../lib/storage";
 import type { ExtensionState } from "../../lib/schema";
@@ -17,7 +17,7 @@ export const PresetsPage = ({ state, refresh }: PresetsPageProps) => {
     }
 
     if (!canCreateAnotherRule(state)) {
-      window.alert("PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro or start the local dev trial.");
+      window.alert(getFreeTierUpgradeMessage());
       return;
     }
 

@@ -1,3 +1,4 @@
+import { LOCAL_TRIAL_ENABLED } from "./api";
 import { MAX_FREE_RULES } from "./constants";
 import type { ExtensionState, LicenseState } from "./schema";
 
@@ -23,6 +24,14 @@ const PRO_FEATURES = new Set<FeatureKey>([
 ]);
 
 export const normalizeLicenseState = (license: LicenseState): LicenseState => {
+  if (!LOCAL_TRIAL_ENABLED && license.status === "trial" && license.trialStartedAt) {
+    return {
+      ...license,
+      status: "expired",
+      syncEnabled: false,
+    };
+  }
+
   if (!license.expiresAt) {
     return license;
   }
@@ -56,7 +65,7 @@ export const getRuleLimit = (license: LicenseState) => (isPaidLicense(license) ?
 export const canCreateAnotherRule = (state: ExtensionState) => state.rules.length < getRuleLimit(state.license);
 
 export const startLocalTrial = (license: LicenseState): LicenseState => {
-  if (license.trialStartedAt || license.status === "pro") {
+  if (!LOCAL_TRIAL_ENABLED || license.trialStartedAt || license.status === "pro") {
     return license;
   }
 
@@ -71,3 +80,8 @@ export const startLocalTrial = (license: LicenseState): LicenseState => {
 };
 
 export const hasRemoteLicenseCredentials = (license: LicenseState) => Boolean(license.accountId && license.syncToken);
+
+export const getFreeTierUpgradeMessage = () =>
+  LOCAL_TRIAL_ENABLED
+    ? "PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro or start the local development trial."
+    : "PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro.";

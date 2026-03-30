@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
-import { syncRequestSchema, syncedStateSchema } from "../lib/schemas";
-import { getSyncedState, setSyncedState } from "../services/licenseService";
+import { syncRequestSchema, syncedStateSchema } from "../lib/schemas.js";
+import { getSyncedState, setSyncedState } from "../services/licenseService.js";
 
 const parseCredentials = (request: Request) =>
   syncRequestSchema.safeParse({

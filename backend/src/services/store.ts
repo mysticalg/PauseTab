@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { getConfig } from "../lib/config";
-import { compareSecret } from "../lib/crypto";
-import { accountRecordSchema, storeDataSchema, type AccountRecord, type StoreData, type WebhookRecord } from "../lib/schemas";
+import { getConfig } from "../lib/config.js";
+import { compareSecret } from "../lib/crypto.js";
+import { accountRecordSchema, storeDataSchema, type AccountRecord, type StoreData, type WebhookRecord } from "../lib/schemas.js";
 
 const emptyStore = (): StoreData => ({
   version: 1,

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { activateLicenseRequestSchema, syncRequestSchema } from "../lib/schemas";
-import { claimCheckoutSession } from "../services/billingService";
-import { activateAccountFromCode, getLicenseStatusForSyncToken } from "../services/licenseService";
+import { activateLicenseRequestSchema, syncRequestSchema } from "../lib/schemas.js";
+import { claimCheckoutSession } from "../services/billingService.js";
+import { activateAccountFromCode, getLicenseStatusForSyncToken } from "../services/licenseService.js";
 
 export const licenseStatus = async (request: Request, response: Response) => {
   const parsed = syncRequestSchema.safeParse(request.query);

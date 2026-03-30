@@ -1,9 +1,10 @@
 import { startTransition, useEffect, useState } from "react";
 
 import { getDailyStats, getProtectedSiteCount, getRemainingBudgetByDomain } from "../lib/analytics";
+import { LOCAL_TRIAL_ENABLED } from "../lib/api";
 import { minutesUntilTomorrow } from "../lib/clock";
 import { domainMatchesPattern, getHostnameFromUrl } from "../lib/domains";
-import { canCreateAnotherRule, startLocalTrial } from "../lib/licensing";
+import { canCreateAnotherRule, getFreeTierUpgradeMessage, startLocalTrial } from "../lib/licensing";
 import { createRule } from "../lib/rules";
 import { getState, updateState } from "../lib/storage";
 import type { ExtensionState } from "../lib/schema";
@@ -22,7 +23,7 @@ const PopupApp = ({ state, activeUrl, refresh }: { state: ExtensionState; active
   const activeDomain = activeUrl ? getHostnameFromUrl(activeUrl) : "";
   const existingRule = state.rules.find((rule) => activeDomain && domainMatchesPattern(activeDomain, rule.domainPattern));
   const pausedUntil = state.globalPauseUntil;
-  const canStartTrial = state.license.status === "free" && !state.license.trialStartedAt;
+  const canStartTrial = LOCAL_TRIAL_ENABLED && state.license.status === "free" && !state.license.trialStartedAt;
 
   const pauseProtections = async (minutes: number | "tomorrow") => {
     await updateState((current) => ({
@@ -50,7 +51,7 @@ const PopupApp = ({ state, activeUrl, refresh }: { state: ExtensionState; active
     }
 
     if (!canCreateAnotherRule(state)) {
-      window.alert("PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro or start the local dev trial.");
+      window.alert(getFreeTierUpgradeMessage());
       await chrome.runtime.openOptionsPage();
       return;
     }

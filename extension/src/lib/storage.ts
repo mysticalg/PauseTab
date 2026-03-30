@@ -1,5 +1,6 @@
 import { STORAGE_KEY, STORAGE_SYNC_KEY, STORAGE_VERSION } from "./constants";
 import { nowIso } from "./clock";
+import { normalizeLicenseState } from "./licensing";
 import { extensionStateSchema, type ExtensionState, type SyncState } from "./schema";
 
 const baseState = (): ExtensionState => ({
@@ -28,10 +29,27 @@ const baseState = (): ExtensionState => ({
   updatedAt: nowIso(),
 });
 
+const normalizeState = (state: ExtensionState): ExtensionState => {
+  const license = normalizeLicenseState(state.license);
+  const syncEnabled = state.preferences.syncEnabled && license.syncEnabled;
+  if (license === state.license && syncEnabled === state.preferences.syncEnabled) {
+    return state;
+  }
+
+  return {
+    ...state,
+    license,
+    preferences: {
+      ...state.preferences,
+      syncEnabled,
+    },
+  };
+};
+
 const parseState = (value: unknown): ExtensionState => {
   const result = extensionStateSchema.safeParse(value);
   if (result.success) {
-    return result.data;
+    return normalizeState(result.data);
   }
 
   return baseState();
@@ -62,21 +80,21 @@ export const getState = async () => {
     return localState;
   }
 
-  return {
+  return normalizeState({
     ...localState,
     rules: syncState.rules,
     preferences: syncState.preferences,
     license: syncState.license,
     updatedAt: syncState.updatedAt,
-  };
+  });
 };
 
 export const setState = async (state: ExtensionState) => {
-  const nextState = {
+  const nextState = normalizeState({
     ...state,
     version: STORAGE_VERSION,
     updatedAt: nowIso(),
-  };
+  });
 
   await chrome.storage.local.set({ [STORAGE_KEY]: nextState });
 

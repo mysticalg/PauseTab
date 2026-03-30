@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import { generateActivationCode, generateSyncToken, hashSecret } from "../lib/crypto";
-import type { AccountRecord, PlanKey, PublicLicenseStatus, SyncedState } from "../lib/schemas";
-import { findAccountByActivationCode, findAccountByEmail, findAccountById, findAccountByStripeCustomerId, findAccountBySyncToken, mutateAccount } from "./store";
+import { generateActivationCode, generateSyncToken, hashSecret } from "../lib/crypto.js";
+import type { AccountRecord, PlanKey, PublicLicenseStatus, SyncedState } from "../lib/schemas.js";
+import { findAccountByActivationCode, findAccountByEmail, findAccountById, findAccountByStripeCustomerId, findAccountBySyncToken, mutateAccount } from "./store.js";
 
 type UpsertAccountParams = {
   email: string;

@@ -1,15 +1,19 @@
 import "./styles.css";
 
 const API_BASE_URL = import.meta.env.VITE_PAUSETAB_API_BASE_URL ?? "http://localhost:8787";
+const SUPPORT_EMAIL = import.meta.env.VITE_PAUSETAB_SUPPORT_EMAIL?.trim() ?? "";
 const ACTIVATION_CODE_STORAGE_KEY = "pausetab-activation-code";
 const ACTIVATION_SESSION_STORAGE_KEY = "pausetab-activation-session";
 
 const state = {
   billingReady: false,
+  nodeEnv: "development",
+  readyPlans: new Set(),
 };
 
 const backendStatus = document.getElementById("backend-status");
 const stripeStatus = document.getElementById("stripe-status");
+const billingConfigStatus = document.getElementById("billing-config-status");
 const checkoutStatus = document.getElementById("checkout-status");
 const successCard = document.getElementById("success-card");
 const activationCodeElement = document.getElementById("activation-code");
@@ -27,6 +31,50 @@ const setInlineStatus = (node, message, tone = "muted") => {
   node.dataset.tone = tone;
 };
 
+const setPill = (node, message, variant) => {
+  if (!node) {
+    return;
+  }
+
+  node.textContent = message;
+  node.dataset.variant = variant;
+};
+
+const applySupportDetails = () => {
+  const supportLabel = SUPPORT_EMAIL || "Set VITE_PAUSETAB_SUPPORT_EMAIL before launch.";
+
+  document.querySelectorAll("[data-support-email]").forEach((node) => {
+    node.textContent = supportLabel;
+  });
+
+  document.querySelectorAll("[data-support-email-link]").forEach((node) => {
+    if (!(node instanceof HTMLAnchorElement)) {
+      return;
+    }
+
+    if (SUPPORT_EMAIL) {
+      node.href = `mailto:${SUPPORT_EMAIL}`;
+      node.removeAttribute("aria-disabled");
+    } else {
+      node.removeAttribute("href");
+      node.setAttribute("aria-disabled", "true");
+    }
+  });
+};
+
+const updateCheckoutButtons = () => {
+  document.querySelectorAll(".checkout-button").forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const plan = button.dataset.plan;
+    const enabled = Boolean(plan) && state.billingReady && state.readyPlans.has(plan);
+    button.disabled = !enabled;
+    button.title = enabled ? "" : "Billing is not configured for this plan yet.";
+  });
+};
+
 const fetchJson = async (path, options) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -41,27 +89,39 @@ const fetchJson = async (path, options) => {
 const refreshBackendStatus = async () => {
   try {
     const data = await fetchJson("/api/auth/status");
-    backendStatus.textContent = data.ok ? "Backend reachable" : "Backend error";
-    backendStatus.dataset.variant = data.ok ? "success" : "danger";
-    stripeStatus.textContent = data.stripeReady ? "Stripe configured" : "Stripe not configured";
-    stripeStatus.dataset.variant = data.stripeReady ? "success" : "warning";
     state.billingReady = Boolean(data.stripeReady);
+    state.nodeEnv = data.nodeEnv ?? "development";
+    state.readyPlans = new Set((data.plans ?? []).filter((plan) => plan.ready).map((plan) => plan.key));
+
+    setPill(backendStatus, data.ok ? "Backend reachable" : "Backend error", data.ok ? "success" : "danger");
+    setPill(stripeStatus, data.stripeReady ? "Stripe configured" : "Billing unavailable", data.stripeReady ? "success" : "warning");
+
+    if (data.stripeReady) {
+      setInlineStatus(billingConfigStatus, "");
+    } else if (state.nodeEnv === "production") {
+      setInlineStatus(billingConfigStatus, "Billing is temporarily unavailable.", "warning");
+    } else {
+      const missing = Array.isArray(data.missingConfiguration) ? data.missingConfiguration.join(", ") : "unknown";
+      setInlineStatus(billingConfigStatus, `Missing billing config: ${missing}`, "warning");
+    }
   } catch {
-    backendStatus.textContent = "Backend offline";
-    backendStatus.dataset.variant = "danger";
-    stripeStatus.textContent = "Billing unavailable";
-    stripeStatus.dataset.variant = "warning";
     state.billingReady = false;
+    state.readyPlans = new Set();
+    setPill(backendStatus, "Backend offline", "danger");
+    setPill(stripeStatus, "Billing unavailable", "warning");
+    setInlineStatus(billingConfigStatus, "The backend could not be reached from this page.", "danger");
   }
+
+  updateCheckoutButtons();
 };
 
 const checkout = async (plan) => {
-  if (!state.billingReady) {
-    setInlineStatus(checkoutStatus, "Stripe is not configured yet on the backend.", "warning");
+  if (!state.billingReady || !state.readyPlans.has(plan)) {
+    setInlineStatus(checkoutStatus, "Billing is not configured for this plan yet.", "warning");
     return;
   }
 
-  setInlineStatus(checkoutStatus, "Creating checkout session…");
+  setInlineStatus(checkoutStatus, "Creating checkout session...");
   try {
     const data = await fetchJson("/api/billing/checkout-session", {
       method: "POST",
@@ -84,7 +144,7 @@ const checkout = async (plan) => {
 };
 
 const claimCheckoutSession = async (sessionId) => {
-  setInlineStatus(checkoutStatus, "Claiming activation code from completed checkout…");
+  setInlineStatus(checkoutStatus, "Claiming activation code from completed checkout...");
   try {
     const data = await fetchJson(`/api/license/claim?sessionId=${encodeURIComponent(sessionId)}`);
     if (!data.ok) {
@@ -99,8 +159,12 @@ const claimCheckoutSession = async (sessionId) => {
       portalCodeInput.value = activationCode;
     }
 
-    successCard.hidden = false;
-    activationCodeElement.textContent = activationCode;
+    if (successCard) {
+      successCard.hidden = false;
+    }
+    if (activationCodeElement) {
+      activationCodeElement.textContent = activationCode;
+    }
     setInlineStatus(checkoutStatus, `Checkout claimed for ${data.license.accountEmail}.`, "success");
     window.location.hash = "activation";
   } catch {
@@ -127,7 +191,7 @@ document.querySelectorAll(".checkout-button").forEach((button) => {
 });
 
 copyActivationButton?.addEventListener("click", async () => {
-  const value = activationCodeElement.textContent;
+  const value = activationCodeElement?.textContent;
   if (!value) {
     return;
   }
@@ -147,7 +211,7 @@ portalForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  setInlineStatus(portalStatus, "Opening Stripe billing portal…");
+  setInlineStatus(portalStatus, "Opening Stripe billing portal...");
   try {
     const data = await fetchJson("/api/billing/portal-session", {
       method: "POST",
@@ -168,6 +232,7 @@ portalForm?.addEventListener("submit", async (event) => {
   }
 });
 
+applySupportDetails();
 await refreshBackendStatus();
 const storedActivationCode = restoreActivationCode();
 
@@ -175,8 +240,12 @@ const params = new URLSearchParams(window.location.search);
 const sessionId = params.get("session_id");
 if (sessionId) {
   if (storedActivationCode && localStorage.getItem(ACTIVATION_SESSION_STORAGE_KEY) === sessionId) {
-    successCard.hidden = false;
-    activationCodeElement.textContent = storedActivationCode;
+    if (successCard) {
+      successCard.hidden = false;
+    }
+    if (activationCodeElement) {
+      activationCodeElement.textContent = storedActivationCode;
+    }
     setInlineStatus(checkoutStatus, "Recovered your stored activation code for this checkout session.", "success");
   } else {
     void claimCheckoutSession(sessionId);

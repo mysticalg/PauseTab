@@ -40,4 +40,4 @@ The backend remains limited to billing, license, and sync data.
 
 ## Contact
 
-Before launch, replace placeholder support details with a real support email and website.
+Contact PauseTab using the support email published on the website support page.

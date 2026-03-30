@@ -33,8 +33,8 @@
 
 ## Launch hardening
 
-- Validate permissions justification
+- Validate permissions justification against [`docs/permissions.md`](docs/permissions.md)
 - Re-check privacy disclosures against actual code paths
 - Build Web Store screenshots from the finished UI
-- Run a final packaging smoke test from the production build
+- Run `npm run release:check` and smoke test the packaged extension zip from `artifacts/`
 - Confirm webhook handling with real Stripe test events before switching live keys

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
-import { checkoutSessionRequestSchema, portalSessionRequestSchema } from "../lib/schemas";
-import { createCheckoutSession, createPortalSession, getBillingCapabilities } from "../services/billingService";
+import { checkoutSessionRequestSchema, portalSessionRequestSchema } from "../lib/schemas.js";
+import { createCheckoutSession, createPortalSession, getBillingCapabilities } from "../services/billingService.js";
 
 export const checkoutStatus = (_request: Request, response: Response) => {
   response.json({

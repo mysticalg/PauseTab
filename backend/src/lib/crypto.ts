@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
-import { getConfig } from "./config";
+import { getConfig } from "./config.js";
 
 const hashValue = (value: string) => createHash("sha256").update(`${getConfig().tokenPepper}:${value}`).digest("hex");
 

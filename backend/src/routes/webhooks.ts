@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import { handleStripeWebhook } from "../services/billingService";
+import { handleStripeWebhook } from "../services/billingService.js";
 
 export const stripeWebhookHandler = async (request: Request, response: Response) => {
   try {

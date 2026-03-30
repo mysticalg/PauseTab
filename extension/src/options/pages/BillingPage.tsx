@@ -1,9 +1,10 @@
 import { useState } from "react";
 
+import { LOCAL_TRIAL_ENABLED } from "../../lib/api";
 import { hasFeature, hasRemoteLicenseCredentials, startLocalTrial } from "../../lib/licensing";
 import { createPortalSessionForLicense, activateRemoteLicense, pullRemoteSyncState, pushRemoteSyncState, refreshRemoteLicense } from "../../lib/remote-license";
-import { getState, updateState } from "../../lib/storage";
 import type { ExtensionState } from "../../lib/schema";
+import { getState, updateState } from "../../lib/storage";
 
 type BillingPageProps = {
   state: ExtensionState;
@@ -38,7 +39,12 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
   };
 
   const startTrialNow = async () => {
-    setBusyMessage("Starting local development trial…");
+    if (!LOCAL_TRIAL_ENABLED) {
+      setStatusMessage("Local development trial is disabled in this build.");
+      return;
+    }
+
+    setBusyMessage("Starting local development trial...");
     await updateState((current) => ({
       ...current,
       license: startLocalTrial(current.license),
@@ -56,7 +62,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
       return;
     }
 
-    setBusyMessage("Activating license…");
+    setBusyMessage("Activating license...");
     try {
       const remoteLicense = await activateRemoteLicense(activationCode.trim());
       await updateState((current) => ({
@@ -80,7 +86,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
       return;
     }
 
-    setBusyMessage("Refreshing license status…");
+    setBusyMessage("Refreshing license status...");
     try {
       const remoteLicense = await refreshRemoteLicense(state.license);
       await updateState((current) => ({
@@ -100,7 +106,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
       return;
     }
 
-    setBusyMessage("Pushing settings to cloud sync…");
+    setBusyMessage("Pushing settings to cloud sync...");
     try {
       await pushRemoteSyncState(await getState());
       await finish("Settings pushed to cloud sync.");
@@ -116,7 +122,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
       return;
     }
 
-    setBusyMessage("Pulling settings from cloud sync…");
+    setBusyMessage("Pulling settings from cloud sync...");
     try {
       const syncedState = await pullRemoteSyncState(state.license);
       if (!syncedState) {
@@ -146,7 +152,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
       return;
     }
 
-    setBusyMessage("Opening Stripe billing portal…");
+    setBusyMessage("Opening Stripe billing portal...");
     try {
       const url = await createPortalSessionForLicense({
         activationCode: state.license.activationCode ?? (activationCode.trim() || undefined),
@@ -154,7 +160,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
         syncToken: state.license.syncToken,
       });
       setBusy(false);
-      setStatusMessage("Opening billing portal…");
+      setStatusMessage("Opening billing portal...");
       await chrome.tabs.create({ url });
     } catch (error) {
       setBusy(false);
@@ -212,14 +218,19 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
         <button className="button" data-variant="ghost" disabled={busy} onClick={() => void openBillingPortal()}>
           Manage billing
         </button>
-        {state.license.status === "free" ? (
+        {LOCAL_TRIAL_ENABLED && state.license.status === "free" ? (
           <button className="button" data-variant="soft" disabled={busy} onClick={() => void startTrialNow()}>
             Start local dev trial
           </button>
         ) : null}
       </div>
 
-      <p className="sectionCopy">{statusMessage || "Use paid activation for production, or the local trial button only when testing without backend credentials."}</p>
+      <p className="sectionCopy">
+        {statusMessage ||
+          (LOCAL_TRIAL_ENABLED
+            ? "Use paid activation for production, or the local trial button only when testing without backend credentials."
+            : "Use paid activation from the PauseTab checkout site to unlock Pro and cloud sync.")}
+      </p>
 
       <div>
         <h3 className="sectionHeading">Pro features</h3>
@@ -237,7 +248,7 @@ export const BillingPage = ({ state, refresh }: BillingPageProps) => {
         <p className="sectionCopy">
           {hasFeature(state.license, "sync")
             ? "Cloud sync is available. Use Push and Pull to move rules and preferences between devices."
-            : "Cloud sync is locked until a Pro or trial license is active."}
+            : `Cloud sync is locked until a ${LOCAL_TRIAL_ENABLED ? "Pro or trial" : "Pro"} license is active.`}
         </p>
       </div>
     </section>

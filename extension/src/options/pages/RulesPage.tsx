@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
 import { RULE_MODE_LABELS, WEEKDAY_LABELS } from "../../lib/constants";
-import { canCreateAnotherRule, hasFeature } from "../../lib/licensing";
+import { canCreateAnotherRule, getFreeTierUpgradeMessage, hasFeature } from "../../lib/licensing";
 import { createRule, exportSettingsJson, importSettingsJson, updateRuleWithPatch } from "../../lib/rules";
 import { updateState } from "../../lib/storage";
 import type { ExtensionState, Rule, RuleMode, ScheduleDay, ScheduleWindow } from "../../lib/schema";
@@ -107,7 +107,7 @@ export const RulesPage = ({ state, refresh }: RulesPageProps) => {
     }
 
     if (!editingId && !canCreateAnotherRule(state)) {
-      window.alert("PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro or start the local dev trial.");
+      window.alert(getFreeTierUpgradeMessage());
       return;
     }
 

@@ -1,10 +1,10 @@
 import Stripe from "stripe";
 
-import { getConfig } from "../lib/config";
-import { getPlanDefinition, getPlanDefinitions, type PlanKey } from "../lib/plans";
-import type { PublicLicenseStatus } from "../lib/schemas";
-import { issueActivationCodeForAccount, upsertLicensedAccount } from "./licenseService";
-import { findAccountByActivationCode, findAccountByStripeCustomerId, findAccountBySyncToken, isWebhookProcessed, markWebhookProcessed } from "./store";
+import { getConfig, getMissingBillingConfiguration, resolveAllowedReturnUrl } from "../lib/config.js";
+import { getPlanDefinition, getPlanDefinitions, type PlanKey } from "../lib/plans.js";
+import type { PublicLicenseStatus } from "../lib/schemas.js";
+import { issueActivationCodeForAccount, upsertLicensedAccount } from "./licenseService.js";
+import { findAccountByActivationCode, findAccountByStripeCustomerId, findAccountBySyncToken, isWebhookProcessed, markWebhookProcessed } from "./store.js";
 
 let stripeClient: Stripe | null = null;
 
@@ -65,8 +65,11 @@ const getSubscriptionPeriodEnd = (subscription: Stripe.Subscription | undefined)
 
 export const getBillingCapabilities = () => {
   const plans = getPlanDefinitions();
+  const missingConfiguration = getMissingBillingConfiguration();
   return {
-    stripeReady: Boolean(getConfig().stripeSecretKey),
+    stripeReady: missingConfiguration.length === 0,
+    webhookReady: Boolean(getConfig().stripeWebhookSecret),
+    missingConfiguration,
     plans: Object.values(plans).map((plan) => ({
       ...plan,
       ready: Boolean(plan.priceId),
@@ -83,6 +86,8 @@ export const createCheckoutSession = async (plan: PlanKey, successUrl?: string, 
 
   const fallbackSuccessUrl = `${getConfig().publicUrl}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
   const fallbackCancelUrl = `${getConfig().publicUrl}/?checkout=cancelled`;
+  const resolvedSuccessUrl = resolveAllowedReturnUrl(successUrl, fallbackSuccessUrl);
+  const resolvedCancelUrl = resolveAllowedReturnUrl(cancelUrl, fallbackCancelUrl);
 
   const session = await stripe.checkout.sessions.create({
     mode: planDefinition.mode,
@@ -95,8 +100,8 @@ export const createCheckoutSession = async (plan: PlanKey, successUrl?: string, 
     allow_promotion_codes: true,
     billing_address_collection: "auto",
     customer_creation: planDefinition.mode === "payment" ? "always" : undefined,
-    success_url: successUrl ?? fallbackSuccessUrl,
-    cancel_url: cancelUrl ?? fallbackCancelUrl,
+    success_url: resolvedSuccessUrl,
+    cancel_url: resolvedCancelUrl,
     metadata: {
       plan,
       product: "PauseTab Pro",
@@ -171,7 +176,7 @@ export const createPortalSession = async (credentials: { activationCode?: string
 
   const session = await stripe.billingPortal.sessions.create({
     customer: account.stripeCustomerId,
-    return_url: returnUrl ?? getConfig().publicUrl,
+    return_url: resolveAllowedReturnUrl(returnUrl, getConfig().publicUrl),
   });
 
   return session;

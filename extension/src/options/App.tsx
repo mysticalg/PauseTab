@@ -62,7 +62,7 @@ export const App = () => {
           <div className="app-headerBlock">
             <p className="eyebrow">PauseTab settings</p>
             <h1 className="title">Calm friction, tuned to your rules.</h1>
-            <p className="subtitle">Configure site delays, budgets, schedules, temporary passes, privacy preferences, and the local Pro trial flow.</p>
+            <p className="subtitle">Configure site delays, budgets, schedules, temporary passes, privacy preferences, and billing.</p>
           </div>
           <div className="options-actions">
             <span className="pill">{getProtectedSiteCount(state)} sites</span>

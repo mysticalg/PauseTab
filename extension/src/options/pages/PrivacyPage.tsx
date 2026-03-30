@@ -1,3 +1,4 @@
+import { LOCAL_TRIAL_ENABLED } from "../../lib/api";
 import { hasFeature } from "../../lib/licensing";
 import { updateState } from "../../lib/storage";
 import type { ExtensionState } from "../../lib/schema";
@@ -68,7 +69,7 @@ export const PrivacyPage = ({ state, refresh }: PrivacyPageProps) => {
       <div className="row">
         <div className="rowLabel">
           <p className="rowTitle">Sync settings</p>
-          <p className="rowMeta">Mirrors rules and preferences into Chrome sync storage when Pro or Trial is active.</p>
+          <p className="rowMeta">Mirrors rules and preferences into Chrome sync storage when {LOCAL_TRIAL_ENABLED ? "Pro or trial" : "Pro"} is active.</p>
         </div>
         <input
           type="checkbox"

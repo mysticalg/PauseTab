@@ -5,12 +5,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 
-import { authStatus } from "./routes/auth";
-import { checkoutStatus, createCheckoutSessionHandler, createPortalSessionHandler } from "./routes/billing";
-import { activateLicenseHandler, claimCheckoutSessionHandler, licenseStatus } from "./routes/license";
-import { saveSyncStateHandler, syncStatus } from "./routes/sync";
-import { stripeWebhookHandler } from "./routes/webhooks";
-import { getConfig } from "./lib/config";
+import { authStatus } from "./routes/auth.js";
+import { checkoutStatus, createCheckoutSessionHandler, createPortalSessionHandler } from "./routes/billing.js";
+import { activateLicenseHandler, claimCheckoutSessionHandler, licenseStatus } from "./routes/license.js";
+import { saveSyncStateHandler, syncStatus } from "./routes/sync.js";
+import { stripeWebhookHandler } from "./routes/webhooks.js";
+import { getConfig, isAllowedRequestOrigin } from "./lib/config.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(currentDir, "../.env"), quiet: true });
@@ -18,7 +18,23 @@ dotenv.config({ path: path.resolve(currentDir, "../.env"), quiet: true });
 const app = express();
 const config = getConfig();
 
-app.use(cors());
+app.use((request, response, next) => {
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.setHeader("X-Frame-Options", "DENY");
+  next();
+});
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      const allowed = isAllowedRequestOrigin(origin);
+      callback(allowed ? null : new Error("Origin is not allowed."), allowed);
+    },
+    allowedHeaders: ["Content-Type", "x-pausetab-account-id", "x-pausetab-sync-token"],
+    methods: ["GET", "POST", "PUT", "OPTIONS"],
+  }),
+);
 app.post("/api/billing/webhooks/stripe", express.raw({ type: "application/json" }), stripeWebhookHandler);
 app.use(express.json());
 
