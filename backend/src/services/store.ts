@@ -11,11 +11,16 @@ const emptyStore = (): StoreData => ({
   webhooks: [],
 });
 
+const resolveStorePath = () => {
+  const configuredPath = getConfig().storePath;
+  return path.isAbsolute(configuredPath) ? configuredPath : path.resolve(process.cwd(), configuredPath);
+};
+
 class JsonStore {
   private queue = Promise.resolve<unknown>(undefined);
 
   private async ensureStoreFile() {
-    const filePath = path.resolve(getConfig().storePath);
+    const filePath = resolveStorePath();
     await mkdir(path.dirname(filePath), { recursive: true });
 
     try {

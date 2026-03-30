@@ -1,4 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
 
 import { authStatus } from "./routes/auth";
@@ -7,6 +11,9 @@ import { activateLicenseHandler, claimCheckoutSessionHandler, licenseStatus } fr
 import { saveSyncStateHandler, syncStatus } from "./routes/sync";
 import { stripeWebhookHandler } from "./routes/webhooks";
 import { getConfig } from "./lib/config";
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(currentDir, "../.env"), quiet: true });
 
 const app = express();
 const config = getConfig();

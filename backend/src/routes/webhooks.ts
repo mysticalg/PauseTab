@@ -8,6 +8,7 @@ export const stripeWebhookHandler = async (request: Request, response: Response)
     await handleStripeWebhook(signature, request.body as Buffer);
     response.json({ ok: true });
   } catch (error) {
+    console.error("Stripe webhook failed:", error);
     response.status(400).json({
       ok: false,
       error: error instanceof Error ? error.message : "Webhook failed.",

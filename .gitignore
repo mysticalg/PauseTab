@@ -8,4 +8,5 @@ Thumbs.db
 extension/dist/
 website/dist/
 backend/dist/
+backend/data/store.json
 tmp/
