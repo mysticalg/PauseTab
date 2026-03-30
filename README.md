@@ -32,4 +32,4 @@ npm run release:check
 4. Build `extension/` with the production API/site URLs.
 5. Run `npm run release:check` to produce the uploadable extension zip in `artifacts/`.
 6. On AWS, `npm run deploy:aws` creates the App Runner services, S3-backed store, and rebuilt extension artifact.
-7. Complete the launch checklist in [`docs/test-plan.md`](docs/test-plan.md), [`docs/support.md`](docs/support.md), [`docs/permissions.md`](docs/permissions.md), and [`docs/aws-deploy.md`](docs/aws-deploy.md).
+7. Complete the launch checklist in [`docs/test-plan.md`](docs/test-plan.md), [`docs/support.md`](docs/support.md), [`docs/permissions.md`](docs/permissions.md), [`docs/aws-deploy.md`](docs/aws-deploy.md), and [`infra/aws/pausetab-deploy-policy.json`](infra/aws/pausetab-deploy-policy.json).

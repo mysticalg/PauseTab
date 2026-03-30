@@ -47,8 +47,25 @@ It writes deployment metadata to `tmp/aws-deploy-output.json`.
 - `iam:PutRolePolicy`
 - `iam:PassRole`
 
+An attachable starting point is included in:
+
+- `infra/aws/pausetab-deploy-policy.json`
+
+If an account admin wants to create and attach it to `githubuser`, the commands are:
+
+```bash
+aws iam create-policy \
+  --policy-name PauseTabDeployPolicy \
+  --policy-document file://infra/aws/pausetab-deploy-policy.json
+
+aws iam attach-user-policy \
+  --user-name githubuser \
+  --policy-arn arn:aws:iam::715113907770:policy/PauseTabDeployPolicy
+```
+
 ## Launch caveats
 
 - If `backend/.env` still uses `sk_test_...`, the deployed environment will use Stripe test mode.
 - Replace the local Stripe listener secret with a real Stripe Dashboard webhook secret before going live.
 - Set a real support email before publishing the website or extension listing.
+- Docker Desktop must be running before `npm run deploy:aws`.
