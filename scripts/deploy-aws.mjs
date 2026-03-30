@@ -8,8 +8,20 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(scriptDir, "..");
 
+const resolveSpawn = (command, args) => {
+  if (process.platform === "win32" && (command === "npm" || command === "npx")) {
+    return {
+      command: "cmd.exe",
+      args: ["/d", "/s", "/c", command, ...args],
+    };
+  }
+
+  return { command, args };
+};
+
 const run = (command, args, options = {}) => {
-  const result = spawnSync(command, args, {
+  const resolved = resolveSpawn(command, args);
+  const result = spawnSync(resolved.command, resolved.args, {
     cwd: rootDir,
     encoding: "utf8",
     stdio: options.capture === false ? "inherit" : "pipe",
@@ -112,17 +124,19 @@ const permissionsHint = [
   "ecr:CreateRepository",
   "ecr:GetAuthorizationToken",
   "ecr:BatchCheckLayerAvailability",
+  "ecr:BatchGetImage",
   "ecr:InitiateLayerUpload",
   "ecr:UploadLayerPart",
   "ecr:CompleteLayerUpload",
   "ecr:PutImage",
   "s3:CreateBucket",
   "s3:PutBucketVersioning",
-  "s3:PutBucketEncryption",
+  "s3:PutEncryptionConfiguration",
   "s3:GetObject",
   "s3:PutObject",
   "iam:GetRole",
   "iam:CreateRole",
+  "iam:CreateServiceLinkedRole",
   "iam:AttachRolePolicy",
   "iam:PutRolePolicy",
   "iam:PassRole",
@@ -326,9 +340,7 @@ const deployService = async ({
     },
   };
 
-  const payload = {
-    ServiceArn: existing?.ServiceArn,
-    ServiceName: serviceName,
+  const basePayload = {
     SourceConfiguration: sourceConfiguration,
     InstanceConfiguration: {
       Cpu: "0.25 vCPU",
@@ -347,11 +359,17 @@ const deployService = async ({
   };
 
   const response = existing
-    ? withTempJson(payload, (filePath) => runJson("aws", ["apprunner", "update-service", "--cli-input-json", `file://${filePath}`, "--output", "json"]))
+    ? withTempJson(
+        {
+          ...basePayload,
+          ServiceArn: existing.ServiceArn,
+        },
+        (filePath) => runJson("aws", ["apprunner", "update-service", "--cli-input-json", `file://${filePath}`, "--output", "json"]),
+      )
     : withTempJson(
         {
-          ...payload,
-          ServiceArn: undefined,
+          ...basePayload,
+          ServiceName: serviceName,
         },
         (filePath) => runJson("aws", ["apprunner", "create-service", "--cli-input-json", `file://${filePath}`, "--output", "json"]),
       );
