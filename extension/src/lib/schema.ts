@@ -9,7 +9,7 @@ export type SetupMode = z.infer<typeof setupModeSchema>;
 export const themeSchema = z.enum(["system", "light", "dark"]);
 export type ThemeMode = z.infer<typeof themeSchema>;
 
-export const licenseStatusSchema = z.enum(["free", "trial", "pro", "expired"]);
+export const licenseStatusSchema = z.enum(["free", "trial", "pro", "past_due", "canceled", "expired"]);
 export type LicenseStatus = z.infer<typeof licenseStatusSchema>;
 
 export const scheduleDaySchema = z.enum(["sun", "mon", "tue", "wed", "thu", "fri", "sat"]);
@@ -103,8 +103,12 @@ export const licenseStateSchema = z.object({
   plan: z.enum(["monthly", "annual", "lifetime"]).optional(),
   expiresAt: z.string().optional(),
   accountId: z.string().optional(),
+  accountEmail: z.string().optional(),
+  activationCode: z.string().optional(),
+  syncToken: z.string().optional(),
   syncEnabled: z.boolean().default(false),
   trialStartedAt: z.string().optional(),
+  lastValidatedAt: z.string().optional(),
 });
 export type LicenseState = z.infer<typeof licenseStateSchema>;
 

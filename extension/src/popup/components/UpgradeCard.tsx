@@ -11,7 +11,7 @@ export const UpgradeCard = ({ onStartTrial, onOpenOptions, canStartTrial }: Upgr
       Unlimited sites, schedules, budgets, session caps, weekly summaries, and temporary passes.
     </p>
     <div className="button-row">
-      {canStartTrial ? <button className="button" onClick={onStartTrial}>Start 7-day trial</button> : null}
+      {canStartTrial ? <button className="button" onClick={onStartTrial}>Start local dev trial</button> : null}
       <button className="button" data-variant="ghost" onClick={onOpenOptions}>
         Compare plans
       </button>

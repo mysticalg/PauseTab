@@ -19,6 +19,7 @@ PauseTab slows down impulsive opens on distracting websites with a short countdo
 - Add a site you want to protect
 - Pick a delay style such as Gentle, Balanced, or Strict
 - When you open that site, PauseTab shows a calm intervention before the page continues
+- If you upgrade, checkout happens on the PauseTab website and the extension is activated with an account code
 
 ### Who it is for
 

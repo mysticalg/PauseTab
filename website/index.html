@@ -13,8 +13,12 @@
           <h1>Pause before distractions.</h1>
           <p class="lede">A Chrome extension that adds calm, configurable friction before distracting websites so focus becomes easier by default.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#pricing">See pricing</a>
-            <a class="button button-secondary" href="#privacy">Privacy promise</a>
+            <a class="button button-primary" href="#pricing">Choose a plan</a>
+            <a class="button button-secondary" href="#activation">Activation flow</a>
+          </div>
+          <div class="status-row">
+            <span class="status-pill" id="backend-status">Checking backend…</span>
+            <span class="status-pill" id="stripe-status">Checking billing…</span>
           </div>
         </div>
         <div class="hero-panel" aria-hidden="true">
@@ -27,7 +31,7 @@
       </section>
 
       <section class="strip">
-        <p>Intentional friction. Local-first analytics. No feed policing. No guilt language.</p>
+        <p>Intentional friction. Local-first analytics. Real checkout path. No feed policing. No guilt language.</p>
       </section>
 
       <section class="section" id="benefits">
@@ -54,23 +58,65 @@
       <section class="section section-dark" id="pricing">
         <div class="section-head">
           <p class="eyebrow">Pricing</p>
-          <h2>Useful free tier. Clear paid upgrade.</h2>
+          <h2>Checkout with Stripe. Activate inside the extension.</h2>
+          <p class="section-copy">After purchase, this site gives you an activation code. Paste it into PauseTab’s Plan tab to unlock Pro and cloud sync.</p>
         </div>
         <div class="pricing">
-          <article>
+          <article class="plan-card">
             <p class="plan">Free</p>
             <h3>Start with up to 3 sites</h3>
             <p>Delay timer, intention prompt, daily counter, popup stats, presets, import/export, and pause controls.</p>
           </article>
-          <article>
-            <p class="plan">Pro</p>
+          <article class="plan-card">
+            <p class="plan">Pro Monthly</p>
             <h3>GBP 3.99/month</h3>
             <p>Unlimited rules, schedules, budgets, session caps, temporary passes, weekly summaries, and sync.</p>
+            <button class="button button-primary checkout-button" data-plan="monthly">Start monthly</button>
           </article>
-          <article>
-            <p class="plan">Annual</p>
+          <article class="plan-card">
+            <p class="plan">Pro Annual</p>
             <h3>GBP 24.99/year</h3>
-            <p>A lower-friction upgrade path for people who already know they want stricter focus controls.</p>
+            <p>Lower-friction long-term plan for people who already know they want stricter focus controls.</p>
+            <button class="button button-primary checkout-button" data-plan="annual">Start annual</button>
+          </article>
+          <article class="plan-card">
+            <p class="plan">Lifetime</p>
+            <h3>GBP 39.00 one-time</h3>
+            <p>Launch offer for early supporters who want permanent Pro access without a renewal cycle.</p>
+            <button class="button button-secondary checkout-button" data-plan="lifetime">Buy lifetime</button>
+          </article>
+        </div>
+        <p class="inline-status" id="checkout-status"></p>
+      </section>
+
+      <section class="section" id="activation">
+        <div class="section-head">
+          <p class="eyebrow">Activation</p>
+          <h2>Turn a completed checkout into an extension license.</h2>
+        </div>
+        <div class="activation-grid">
+          <article class="activation-card" id="success-card" hidden>
+            <h3>Checkout completed</h3>
+            <p>Your activation code unlocks PauseTab Pro and cloud sync inside the extension.</p>
+            <div class="code-box" id="activation-code">Waiting for checkout claim…</div>
+            <div class="hero-actions">
+              <button class="button button-primary" id="copy-activation" type="button">Copy code</button>
+            </div>
+            <ol class="steps">
+              <li>Open the PauseTab extension options page.</li>
+              <li>Go to the Plan tab.</li>
+              <li>Paste the activation code and activate the license.</li>
+            </ol>
+          </article>
+          <article class="activation-card">
+            <h3>Manage subscription</h3>
+            <p>Paste your activation code to open Stripe’s customer portal for billing updates or cancellation.</p>
+            <form id="portal-form" class="portal-form">
+              <label for="portal-code">Activation code</label>
+              <input id="portal-code" name="activationCode" placeholder="PT-XXXXXX-XXXXXX-XXXXXX" />
+              <button class="button button-secondary" type="submit">Open billing portal</button>
+            </form>
+            <p class="inline-status" id="portal-status"></p>
           </article>
         </div>
       </section>

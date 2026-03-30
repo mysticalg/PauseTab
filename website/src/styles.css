@@ -8,6 +8,9 @@
   --muted: rgba(238, 242, 235, 0.7);
   --accent: #ffb678;
   --accent-strong: #dd6a2d;
+  --success: #76d9a7;
+  --warning: #ffb678;
+  --danger: #ff8f8f;
   font-family: "Segoe UI Variable Display", "Aptos", "Segoe UI", sans-serif;
 }
 
@@ -63,7 +66,8 @@ h1 {
   letter-spacing: -0.06em;
 }
 
-.lede {
+.lede,
+.section-copy {
   max-width: 34ch;
   margin-top: 18px;
   font-size: 18px;
@@ -73,13 +77,16 @@ h1 {
 
 .hero-actions,
 .detail-list,
-.pricing {
+.pricing,
+.status-row,
+.activation-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
 }
 
-.hero-actions {
+.hero-actions,
+.status-row {
   margin-top: 28px;
 }
 
@@ -92,7 +99,9 @@ h1 {
   border: 1px solid transparent;
   border-radius: 999px;
   text-decoration: none;
+  font: inherit;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .button-primary {
@@ -104,6 +113,30 @@ h1 {
   border-color: var(--line);
   background: transparent;
   color: var(--ink);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-pill[data-variant="success"] {
+  color: var(--success);
+}
+
+.status-pill[data-variant="warning"] {
+  color: var(--warning);
+}
+
+.status-pill[data-variant="danger"] {
+  color: var(--danger);
 }
 
 .hero-panel {
@@ -158,7 +191,7 @@ h1 {
 }
 
 .section-head {
-  max-width: 660px;
+  max-width: 720px;
 }
 
 .section-head h2 {
@@ -173,15 +206,19 @@ h1 {
 }
 
 .detail-list article,
-.pricing article {
+.plan-card,
+.activation-card {
   flex: 1 1 240px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .detail-list p,
-.pricing p,
-.privacy-copy p {
+.plan-card p,
+.privacy-copy p,
+.activation-card p {
   margin-top: 12px;
   color: var(--muted);
   line-height: 1.7;
@@ -190,6 +227,70 @@ h1 {
 .plan {
   color: var(--accent);
   font-weight: 700;
+}
+
+.pricing .button {
+  margin-top: 18px;
+}
+
+.inline-status {
+  margin-top: 18px;
+  min-height: 1.4em;
+  color: var(--muted);
+}
+
+.inline-status[data-tone="success"] {
+  color: var(--success);
+}
+
+.inline-status[data-tone="warning"] {
+  color: var(--warning);
+}
+
+.inline-status[data-tone="danger"] {
+  color: var(--danger);
+}
+
+.activation-grid {
+  margin-top: 26px;
+}
+
+.code-box {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px dashed rgba(255, 182, 120, 0.4);
+  border-radius: 22px;
+  background: rgba(255, 182, 120, 0.08);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.portal-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.portal-form label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.portal-form input {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font: inherit;
+}
+
+.steps {
+  margin: 18px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.8;
 }
 
 .privacy-copy {
@@ -214,5 +315,10 @@ h1 {
 
   .hero-panel {
     min-height: 360px;
+  }
+
+  .code-box {
+    font-size: 18px;
+    word-break: break-word;
   }
 }

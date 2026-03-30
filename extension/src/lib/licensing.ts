@@ -30,7 +30,7 @@ export const normalizeLicenseState = (license: LicenseState): LicenseState => {
   if (new Date(license.expiresAt).getTime() <= Date.now()) {
     return {
       ...license,
-      status: license.status === "pro" ? "expired" : "free",
+      status: license.status === "pro" || license.status === "trial" ? "expired" : license.status,
       syncEnabled: false,
     };
   }
@@ -69,3 +69,5 @@ export const startLocalTrial = (license: LicenseState): LicenseState => {
     syncEnabled: true,
   };
 };
+
+export const hasRemoteLicenseCredentials = (license: LicenseState) => Boolean(license.accountId && license.syncToken);

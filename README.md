@@ -16,3 +16,16 @@ npm install
 npm run build
 npm run test
 ```
+
+## Environment
+
+- `backend/.env.example`: Stripe keys, webhook secret, price IDs, and token pepper
+- `website/.env.example`: backend API base URL for checkout and activation
+- `extension/.env.example`: backend API base URL and site URL for activation and billing portal returns
+
+## Production path
+
+1. Configure Stripe prices and webhook signing in `backend/.env`.
+2. Deploy `website/` and `backend/` to the same public environment.
+3. Build `extension/` with the production API/site URLs.
+4. Complete the launch checklist in [`docs/test-plan.md`](docs/test-plan.md) and [`docs/support.md`](docs/support.md).

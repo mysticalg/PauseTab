@@ -1,9 +1,13 @@
 import type { Request, Response } from "express";
 
+import { getBillingCapabilities } from "../services/billingService";
+import { getConfig } from "../lib/config";
+
 export const authStatus = (_request: Request, response: Response) => {
+  const capabilities = getBillingCapabilities();
   response.json({
     ok: true,
-    provider: "placeholder",
-    message: "Auth is not wired yet. Use the local trial flow inside the extension.",
+    publicUrl: getConfig().publicUrl,
+    ...capabilities,
   });
 };

@@ -21,7 +21,15 @@ PauseTab is designed to be local-first and privacy-first. The extension exists t
 
 ## Paid plan behavior
 
-Paid or trial states can enable settings sync. In this repository, sync is implemented with Chrome sync storage for rules and preferences. A future backend may add account-based licensing and subscription state, but that backend should remain limited to billing, license, and sync data.
+Paid or trial states can enable settings sync. In this repository, paid activation can store:
+
+- account email
+- license status
+- activation code hash
+- sync token hash
+- synced settings payloads
+
+The backend remains limited to billing, license, and sync data.
 
 ## Data use commitments
 

@@ -107,7 +107,7 @@ export const RulesPage = ({ state, refresh }: RulesPageProps) => {
     }
 
     if (!editingId && !canCreateAnotherRule(state)) {
-      window.alert("PauseTab Free supports up to 3 protected sites. Start the local Pro trial to add more.");
+      window.alert("PauseTab Free supports up to 3 protected sites. Open the Plan tab to activate Pro or start the local dev trial.");
       return;
     }
 
